@@ -1,0 +1,14 @@
+.App {
+    display: flex;
+  }
+  
+  .sideBar {
+    width: 250px;
+    background-color: #f0f0f0; /* Couleur de fond pour la barre latérale */
+  }
+  
+  .container {
+    flex: 1;
+    padding: 20px;
+  }
+  

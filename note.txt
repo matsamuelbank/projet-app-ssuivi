@@ -1,0 +1,12 @@
+page d'accueil :
+
+il doit y avoir une sidebar avec les infos suivantes:
+le composant logo de l'app
+--Dashboard : 
+Le Menu de nav dans lequel il y aura les liens vers : Projets, Taches,Vue rapide (englobe un peu tout),Notifications
+
+En dessous de tout ça la section profil 
+-- Profil --
+Composant image ( en le survolant on ouvre la page du profil)
+Nom de l'utilisateur 
+Déconnexion
