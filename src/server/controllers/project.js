@@ -152,3 +152,45 @@ exports.downloadFile = (req, res) => {
     }
   });
 };
+
+
+exports.updateProject = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    const projectData = {
+      nameProject: req.body.nameProject,
+      descriptionProject: req.body.descriptionProject,
+      startDateProject: req.body.startDateProject,
+      endDateProject: req.body.endDateProject,
+      assignedUsersProject: req.body.assignedUsersProject,
+      idUserCreator: req.body.idUserCreator,  // Conversion en ObjectId
+      isCompleted: req.body.isCompleted,
+      files: req.files ? req.files.map(file => file.filename) : []
+    };
+
+    // Update le projet
+    const updatedProject = await Project.findByIdAndUpdate(projectId, projectData, { new: true });
+
+    if (req.body.tasks) {
+      // Vérifie si req.body.tasks est un tableau
+      const reqTableTask = Array.isArray(req.body.tasks) ? req.body.tasks : [req.body.tasks];
+      const tasks = reqTableTask.map(task => JSON.parse(task));
+      const taskPromises = tasks.map(task => {
+        return Task.findByIdAndUpdate(task._id, task, { new: true });
+      });
+      console.log(taskPromises);
+      await Promise.all(taskPromises);
+    }
+    
+    res.status(200).json({
+      message: 'Projet mis à jour avec succès',
+      project: updatedProject
+    });
+  } catch (error) {
+    console.error('Erreur lors de la mise à jour du projet:', error);
+    res.status(500).json({ error: 'Erreur lors de la mise à jour du projet' });
+  }
+};
+
+

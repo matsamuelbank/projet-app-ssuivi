@@ -21,7 +21,7 @@ const projectRoutes = require('./routes/project');
 const path = require('path');
 
 
-mongoose.connect('mongodb+srv://samuel:Jq3TMDKIgiRCY8tb@cluster0.2vhaziw.mongodb.net/')
+mongoose.connect('ici il faut mettre votre chaine de connexion à votre cluster mongodb')
 
 .then(() => console.log('Connexion à MongoDB réussie !'))
 .catch(() => console.log('Connexion à MongoDB échouée !'));

@@ -88,6 +88,7 @@ export function Project() {
         setIdUserCreator(project.idUserCreator);
         setCompletedProject(project.isCompleted);
         setTasks(project.tasks);
+        console.log(project)
         console.log(project.tasks)
       } catch (error) {
         console.error('Failed to fetch project details:', error);
@@ -101,37 +102,77 @@ export function Project() {
     }
   }, [id, token]);
 
-// Fonction de téléchargement des fichiers
-async function downloadFile(fileName) {
-  try {
-    const response = await axios.get(`http://localhost:3001/api/project/download/${fileName}`, {
-      responseType: 'blob',
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
+  async function updateProject() {
+    const formData = new FormData();
+    
+    formData.append("nameProject", nameProject);
+    formData.append("descriptionProject", descriptionProject);
+    formData.append('startDateProject', startDate);
+    formData.append('endDateProject', endDate);
+    formData.append('idUserCreator', idUserCreator._id); 
+    console.log(idUserCreator._id) // Send as a string
+    formData.append('isCompleted', isCompletedProject);
+    selectedUserIds.forEach(userId => formData.append("assignedUsersProject", userId));
+    
+    files.forEach(file => formData.append("files", file));
+    
+    const tasksToAppend = updatedTasks.length > 0 ? updatedTasks : tasks;
+    tasksToAppend.forEach(task => {
+      formData.append("tasks", JSON.stringify(task)); 
+      console.log(tasksToAppend) 
     });
-
-    if (!response.data || response.status !== 200) {
-      throw new Error('Échec du téléchargement du fichier');
+  
+    try {
+      const response = await axios.put(`http://localhost:3001/api/project/update/${id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`,
+        }
+      });
+      console.log('Projet mis à jour avec succès', response.data);
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du projet', error);
     }
-
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', fileName);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link); // Nettoyage après le téléchargement
-  } catch (error) {
-    console.error('Failed to download file:', error);
   }
-}
+  
+  // Fonction de téléchargement des fichiers
+  async function downloadFile(fileName) {
+    try {
+      const response = await axios.get(`http://localhost:3001/api/project/download/${fileName}`, {
+        responseType: 'blob',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.data || response.status !== 200) {
+        throw new Error('Échec du téléchargement du fichier');
+      }
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link); // Nettoyage après le téléchargement
+    } catch (error) {
+      console.error('Failed to download file:', error);
+    }
+  }
 
 
   const handleUserChange = (event) => {
-    setSelectedUserIds(event.target.value);
+    const value = event.target.value;
+  
+    // Met à jour selectedUserIds avec les nouvelles valeurs sélectionnées
+    // si value est un tableau ? on remplace directement si non on cree un table avec split et separe les string par des virgules
+    setSelectedUserIds(Array.isArray(value) ? value : value.split(','));
+  
+    console.log("Liste des utilisateurs sélectionnés:", value);
   };
-
+  
+  
   const handleSwitchChange = (e) => {
     const newValue = e.target.checked;
     setCompletedProject(newValue);
@@ -226,7 +267,7 @@ async function downloadFile(fileName) {
           inputProps={{ 'aria-label': 'controlled' }}
         />
         {isCompletedProject === false ? "Le projet n'est pas encore terminé." : "Le projet est terminé , vous pouvez valider l'ensemble des modifications."}
-        <Button variant="outlined">Enregistrer les modifications</Button> 
+        <Button onClick={updateProject} variant="outlined">Enregistrer les modifications</Button> 
       </Box>
     </Box>
   );
